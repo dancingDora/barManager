@@ -11,9 +11,15 @@ function FinancialsScreen() {
   }, []);
 
   const fetchFinancialData = async () => {
-    // Placeholder for function to get financial data
-    const data = await getFinancialData();
-    setFinancialData(data);
+    try {
+      let response = await fetch('http://10.0.2.2:8000/getFinancialData.php');
+      // console.log(response);
+      let json = await response.json();
+      
+      setFinancialData(json);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
