@@ -1,0 +1,20 @@
+# ignore build directory
+
+/build/
+.vscode
+
+# ignore all files that end with a tilde (~)
+
+\*~
+
+# ignore object files, shared libraries, executables, etc.
+
+_.o
+_.a
+_.so
+_.exe
+\*.out
+
+# ignore core dump files
+
+core
