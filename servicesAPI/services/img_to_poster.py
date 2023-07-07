@@ -1,18 +1,49 @@
-# Importing Required Modules
-from rembg import remove
-from PIL import Image
+from io import BytesIO
+from PIL import Image, ImageEnhance, ImageFilter, ImageDraw, ImageFont
+import numpy as np
 
-# Store path of the image in the variable input_path
-input_path = '../resources/beer-with-background.jpg'
+class PosterService:
 
-# Store path of the output image in the variable output_path
-output_path = '../resources/beer-without-background.jpg'
+    @staticmethod
+    def process_image_bytes(img):
+        # img = Image.open(BytesIO(image_bytes))
 
-# Processing the image
-input = Image.open(input_path)
+        # Enhance Image
+        enhancer = ImageEnhance.Color(img)
+        img = enhancer.enhance(1)  # Increase color saturation
 
-# Removing the background from the given Image
-output = remove(input)
+        # Sharpen Image
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(2.0)  # Increase sharpness
 
-# Saving the image in the given path
-output.save(output_path)
+        # Blur Image
+        img = img.filter(ImageFilter.GaussianBlur(radius=1))
+
+        # Add Border
+        border_color = (30, 30, 30)  # Light gray color
+        border_width = 2
+        img_with_border = Image.new('RGB', (img.size[0] + 2 * border_width, img.size[1] + 2 * border_width), border_color)
+        img_with_border.paste(img, (border_width, border_width))
+
+        # Add text
+        draw = ImageDraw.Draw(img_with_border)
+        font = ImageFont.truetype('arial.ttf', 60)  # Use Arial, size 60
+        draw.text((20, img_with_border.size[1] - 70), "$5.99", fill='white', font=font)
+
+        return img_with_border
+
+    @staticmethod
+    def process_image_path(input_path, output_path):
+        with open(input_path, 'rb') as f:
+            image_bytes = f.read()
+
+        img = PosterService.process_image_bytes(image_bytes)
+
+        img.save(output_path)
+
+
+if __name__ == '__main__':
+    # Define file paths
+    img1 = '../resources/beer-with-background.jpg'
+    img2 = '../resources/beer-poster.jpg'
+    PosterService.process_image_path(img1, img2)
