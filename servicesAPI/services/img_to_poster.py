@@ -5,16 +5,16 @@ import numpy as np
 class PosterService:
 
     @staticmethod
-    def process_image_bytes(img):
+    def process_image_bytes(img,  price, description):
         # img = Image.open(BytesIO(image_bytes))
 
         # Enhance Image
         enhancer = ImageEnhance.Color(img)
-        img = enhancer.enhance(1)  # Increase color saturation
+        img = enhancer.enhance(1.5)  # Increase color saturation
 
         # Sharpen Image
         enhancer = ImageEnhance.Sharpness(img)
-        img = enhancer.enhance(2.0)  # Increase sharpness
+        img = enhancer.enhance(5.0)  # Increase sharpness
 
         # Blur Image
         img = img.filter(ImageFilter.GaussianBlur(radius=1))
@@ -28,7 +28,7 @@ class PosterService:
         # Add text
         draw = ImageDraw.Draw(img_with_border)
         font = ImageFont.truetype('arial.ttf', 60)  # Use Arial, size 60
-        draw.text((20, img_with_border.size[1] - 70), "$5.99", fill='white', font=font)
+        draw.text((20, img_with_border.size[1] - 70), f"${price}", fill='white', font=font)
 
         return img_with_border
 

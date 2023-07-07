@@ -3,26 +3,31 @@ from services.gpt_service import GptService
 from flask_cors import CORS, cross_origin
 import io
 from services.img_to_poster import PosterService
+from services.img_downloader import ImgDownloader
 from PIL import Image
 
 app = Flask(__name__)
 CORS(app, resources={r"/recommend_cocktail": {"origins": "*"}})
+
+
 @app.route('/create_poster', methods=['POST'])
 def create_poster():
     if 'image' not in request.files:
         return 'No image file uploaded.', 400
 
-    file = request.files['image']
-    image = Image.open(file.stream)  # open image file
-    processed_image = PosterService.process_image_bytes(image)  # process image
+    image_file = request.files['image']
+    price = request.form.get('price')
+    description = request.form.get('description')
 
-    # Convert PIL Image to file-like object
-    img_io = io.BytesIO()
-    processed_image.save(img_io, 'JPEG')
-    img_io.seek(0)
+    image = Image.open(image_file.stream)  # Open image file
+    processed_image = PosterService.process_image_bytes(image, price, description)  # Process image
 
-    return send_file(img_io, mimetype='image/jpeg')
+    # Convert PIL Image to bytes-like object
+    img_byte_arr = io.BytesIO()
+    processed_image.save(img_byte_arr, format='JPEG')
+    img_byte_arr = img_byte_arr.getvalue()
 
+    return send_file(io.BytesIO(img_byte_arr), mimetype='image/jpeg')
     # {
     #     "title": "football watch",
     #     "date": "evening 8:00",
@@ -46,6 +51,18 @@ def generate_event_description():
 
     return result
 
+@app.route('/download_image', methods=['POST'])
+def download_image():
+    if 'query' not in request.form:
+        return 'No query provided.', 400
+
+    query = request.form['query']
+    image_filename = ImgDownloader.download_image(query)
+
+    if image_filename:
+        return send_file(image_filename, mimetype='image/jpeg')
+    else:
+        return 'No image found for the query.'
 
 if __name__ == "__main__":
     app.run(port=5000)
